@@ -8,16 +8,25 @@ datasource db {
 }
 
 model User {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  email String @unique
-  username String @unique
-  roleId String @db.ObjectId
-  status String
-  password String
-  role Role @relation(fields: [roleId], references: [id])
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
+  username  String    @unique
+  roleId    String    @db.ObjectId
+  status    String
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
+  role      Role      @relation(fields: [roleId], references: [id])
 }
 
 model Role {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
+  User      User[]
 }
