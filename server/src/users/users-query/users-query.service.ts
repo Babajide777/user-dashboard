@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma.service';
 import { CreateUserType } from '../types/create-user-type';
 import { User } from '@prisma/client';
 import { EditUserDto } from '../dto/edit-user.dto';
+import { PaginationDto } from '../dto/pagination.dto';
 
 @Injectable()
 export class UsersQueryService {
@@ -48,5 +49,29 @@ export class UsersQueryService {
       },
       data: { ...data, updatedAt: new Date(Date.now()) },
     });
+  }
+
+  async findAllUsers(paginationDto: PaginationDto) {
+    const limit = paginationDto.limit ? paginationDto.limit : 10;
+    const page = paginationDto.page ? paginationDto.page : 1;
+    const offset = (Number(page) - 1) * Number(limit);
+
+    const totalUsers = await this.prismaService.user.count({
+      where: { deleted: false },
+    });
+
+    const users = await this.prismaService.user.findMany({
+      skip: offset,
+      take: Number(limit),
+      where: { deleted: false },
+    });
+
+    return {
+      data: users,
+      total: totalUsers,
+      page,
+      limit,
+      totalPages: Math.ceil(totalUsers / Number(limit)),
+    };
   }
 }

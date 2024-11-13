@@ -4,11 +4,11 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { ResponseService } from 'src/utils/response/response.service';
 import { PasswordHashService } from 'src/utils/password-hash/password-hash.service';
 import { UsersQueryService } from './users-query/users-query.service';
 import { EditUserDto } from './dto/edit-user.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class UsersService {
@@ -67,5 +67,28 @@ export class UsersService {
     return this.responseService.response(true, 'User deleted successfully', {
       user,
     });
+  }
+
+  async allUsers(paginationDto: PaginationDto) {
+    if (paginationDto.limit) {
+      let checkNum = Number(paginationDto.limit);
+
+      if (!checkNum)
+        throw new UnprocessableEntityException('Limit must be a number');
+    }
+    if (paginationDto.page) {
+      let checkPage = Number(paginationDto.page);
+
+      if (!checkPage)
+        throw new UnprocessableEntityException('Page must be a number');
+    }
+
+    const data = await this.usersQueryService.findAllUsers(paginationDto);
+
+    return this.responseService.response(
+      true,
+      'All users retrieved successfully',
+      { ...data },
+    );
   }
 }
