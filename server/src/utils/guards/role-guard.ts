@@ -10,7 +10,7 @@ import { Role } from '../enums';
 import { ROLES_KEY } from '../custom-decorators/role.decorator';
 
 @Injectable()
-export class ModesGuard implements CanActivate {
+export class RolesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private readonly usersQueryService: UsersQueryService,

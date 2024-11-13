@@ -11,6 +11,7 @@ import {
   HttpStatus,
   ParseIntPipe,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -28,12 +29,17 @@ import { IResponse } from 'src/utils/response/response.type';
 import { EditUserDto } from './dto/edit-user.dto';
 import { SuccessResponseDto } from 'src/auth/dto/success-response.dto';
 import { PaginationDto } from './dto/pagination.dto';
+import { RolesGuard } from 'src/utils/guards/role-guard';
+import { Roles } from 'src/utils/custom-decorators/role.decorator';
+import { Role } from 'src/utils/enums';
 
 @ApiTags('users')
 @Controller('users')
+@UseGuards(RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Roles(Role.admin)
   @Post('')
   @ApiOperation({ summary: 'Create User' })
   @ApiCreatedResponse({
@@ -52,6 +58,7 @@ export class UsersController {
     return this.usersService.createUser(createUserDto);
   }
 
+  @Roles(Role.admin)
   @Patch(':userId')
   @ApiOperation({ summary: 'Edit user' })
   @ApiOkResponse({
@@ -74,6 +81,7 @@ export class UsersController {
     return this.usersService.editUser(userId, editUserDto);
   }
 
+  @Roles(Role.admin)
   @Delete(':userId')
   @ApiOperation({ summary: 'Delete user' })
   @ApiOkResponse({
@@ -94,6 +102,7 @@ export class UsersController {
     return await this.usersService.deleteUser(userId);
   }
 
+  @Roles(Role.admin, Role.user)
   @Get('')
   @ApiOperation({ summary: 'Get all users' })
   @ApiOkResponse({

@@ -8,6 +8,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
@@ -21,12 +22,17 @@ import {
 import { FailResponseDto } from 'src/auth/dto/fail-response.dto';
 import { SuccessResponseDto } from 'src/auth/dto/success-response.dto';
 import { IResponse } from 'src/utils/response/response.type';
+import { RolesGuard } from 'src/utils/guards/role-guard';
+import { Roles } from 'src/utils/custom-decorators/role.decorator';
+import { Role } from 'src/utils/enums';
 
 @ApiTags('roles')
 @Controller('roles')
+@UseGuards(RolesGuard)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
+  @Roles(Role.admin, Role.user)
   @Get('')
   @ApiOperation({ summary: 'Get all roles' })
   @ApiOkResponse({
