@@ -2,9 +2,9 @@
 
 import { Typography, Box, Container, Button, Skeleton } from "@mui/material";
 import Image from "next/image";
-import SignIn from "./components/shared/SignIn";
+import UserList from "../components/shared/UsersList";
 
-export default function Home() {
+export default function Users() {
   return (
     <Box
       sx={{
@@ -14,7 +14,7 @@ export default function Home() {
         paddingTop: "2rem",
       }}
     >
-      <SignIn />
+      <UserList />
     </Box>
   );
 }
