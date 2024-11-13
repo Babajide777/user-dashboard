@@ -1,7 +1,9 @@
 import { PrismaClient } from '@prisma/client';
+import { PasswordHashService } from '../src/utils/password-hash/password-hash.service';
 const prisma = new PrismaClient();
 
 async function main() {
+  const passwordHashService = new PasswordHashService();
   const adminRole = await prisma.role.create({
     data: {
       name: 'admin',
@@ -21,7 +23,7 @@ async function main() {
       email: 'admin@example.com',
       userName: 'adminUser',
       status: 'active',
-      password: 'secureAdminPassword',
+      password: await passwordHashService.hashPassword('secureAdminPassword'),
       roleId: adminRole.id,
     },
   });
@@ -33,7 +35,7 @@ async function main() {
       email: 'user@example.com',
       userName: 'regularUser',
       status: 'active',
-      password: 'secureUserPassword',
+      password: await passwordHashService.hashPassword('secureUserPassword'),
       roleId: userRole.id,
     },
   });
