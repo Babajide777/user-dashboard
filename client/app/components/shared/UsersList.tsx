@@ -27,7 +27,8 @@ import { Edit, Delete } from "@mui/icons-material";
 import { IUser } from "@/app/types";
 import {
   useCreateUserMutation,
-  useDeleteProductMutation,
+  useDeleteUserMutation,
+  useEditUserMutation,
   useGetAllUsersQuery,
 } from "@/app/store/Features/users/usersApiSlice";
 import { useGetAllRolesQuery } from "@/app/store/Features/roles/rolesApiSlice";
@@ -73,7 +74,8 @@ const UserList: React.FC = () => {
   }, []);
 
   const [createUser] = useCreateUserMutation();
-  const [deleteUser] = useDeleteProductMutation();
+  const [deleteUser] = useDeleteUserMutation();
+  const [editUser] = useEditUserMutation();
 
   const handleOpen: any = (user: IUser | null) => {
     setCurrentUser(user);
@@ -86,51 +88,107 @@ const UserList: React.FC = () => {
   };
 
   const handleSaveUser = async () => {
-    try {
-      const { success, message, payload } = await createUser(
-        currentUser
-      ).unwrap();
+    if (currentUser) {
+      if (currentUser.id) {
+        const { id, roleId, status } = currentUser;
 
-      if (success) {
-        toast.success(`${message}`, {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        refetch();
-        handleClose();
+        try {
+          const { success, message, payload } = await editUser({
+            id,
+            roleId,
+            status,
+          }).unwrap();
+
+          if (success) {
+            toast.success(`${message}`, {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+            });
+            refetch();
+            handleClose();
+          } else {
+            toast.error(`${message}`, {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+            });
+          }
+        } catch (error: any) {
+          let msg =
+            error.message ||
+            (error.data && error.data.message) ||
+            "An error occurred";
+          toast.error(`${msg}`, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        }
+        console.log({ currentUser });
       } else {
-        toast.error(`${message}`, {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+        try {
+          const { success, message, payload } = await createUser(
+            currentUser
+          ).unwrap();
+
+          if (success) {
+            toast.success(`${message}`, {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+            });
+            refetch();
+            handleClose();
+          } else {
+            toast.error(`${message}`, {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+            });
+          }
+        } catch (error: any) {
+          let msg =
+            error.message ||
+            (error.data && error.data.message) ||
+            "An error occurred";
+          toast.error(`${msg}`, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        }
       }
-    } catch (error: any) {
-      let msg =
-        error.message ||
-        (error.data && error.data.message) ||
-        "An error occurred";
-      toast.error(`${msg}`, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
     }
   };
 
@@ -300,6 +358,7 @@ const UserList: React.FC = () => {
             label="Email"
             type="email"
             fullWidth
+            disabled={currentUser ? true : false}
             value={currentUser?.email || ""}
             onChange={(e) =>
               setCurrentUser({ ...currentUser!, email: e.target.value })
@@ -311,6 +370,7 @@ const UserList: React.FC = () => {
             type="text"
             fullWidth
             value={currentUser?.userName || ""}
+            disabled={currentUser ? true : false}
             onChange={(e) =>
               setCurrentUser({ ...currentUser!, userName: e.target.value })
             }
@@ -348,6 +408,7 @@ const UserList: React.FC = () => {
             type="password"
             fullWidth
             value={currentUser?.password || ""}
+            disabled={currentUser ? true : false}
             onChange={(e) =>
               setCurrentUser({ ...currentUser!, password: e.target.value })
             }

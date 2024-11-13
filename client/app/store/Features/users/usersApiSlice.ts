@@ -38,11 +38,22 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         body: { ...credentials },
       }),
     }),
-    deleteProduct: builder.mutation({
+    deleteUser: builder.mutation({
       query: (id) => {
         return {
           url: `users/${id}`,
           method: "DELETE",
+        };
+      },
+      invalidatesTags: [{ type: "users", id: "LIST" }],
+    }),
+    editUser: builder.mutation({
+      query: (data) => {
+        const { id, ...item } = data;
+        return {
+          url: `users/${id}`,
+          method: "PATCH",
+          body: { ...item },
         };
       },
       invalidatesTags: [{ type: "users", id: "LIST" }],
@@ -54,5 +65,6 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 export const {
   useGetAllUsersQuery,
   useCreateUserMutation,
-  useDeleteProductMutation,
+  useDeleteUserMutation,
+  useEditUserMutation,
 } = usersApiSlice;
