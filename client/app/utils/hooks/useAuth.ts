@@ -1,25 +1,28 @@
 import { useSelector } from "react-redux";
 import { jwtDecode } from "jwt-decode";
-import { IDecoded, RootState } from "@/app/types";
+import { IDecoded } from "@/app/types";
+import { RootState } from "@/app/store/store";
+import { Role } from "@/app/enums";
 
 const useAuth = () => {
   const token = useSelector((state: RootState) => state.auth.token);
 
-  let isSuperAdmin = false;
   let isAdmin = false;
   let isUser = false;
 
   if (token) {
     const decoded: IDecoded = jwtDecode(token);
 
-    const { email, exp, iat, role, sub, fullname } = decoded;
+    const { role } = decoded;
+
+    if (!role) return { isAdmin, isUser };
 
     switch (role) {
-      case "user":
+      case Role.user:
         isUser = true;
-
         break;
-      case "admin":
+
+      case Role.admin:
         isAdmin = true;
 
         break;
@@ -28,10 +31,10 @@ const useAuth = () => {
         break;
     }
 
-    return { email, isAdmin, isUser, isSuperAdmin, fullname };
+    return { isAdmin, isUser };
   }
 
-  return { email: "", isAdmin, isUser, isSuperAdmin, fullname: "" };
+  return { isAdmin, isUser };
 };
 
 export default useAuth;

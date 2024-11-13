@@ -29,7 +29,10 @@ export class AuthService {
 
     if (!passCheck) throw new BadRequestException('Wrong email or password');
 
-    let token = this.jwtService.sign({ id: checkEmail.id });
+    let token = this.jwtService.sign({
+      id: checkEmail.id,
+      role: checkEmail.role.name,
+    });
 
     return this.responseService.response(true, 'User logged-in successfully', {
       user: checkEmail,
