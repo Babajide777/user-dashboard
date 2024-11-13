@@ -1,13 +1,18 @@
 "use client";
 
-import { IAllUsersResponse, IUser } from "@/app/types";
+import {
+  IAllUsersAPIResponse,
+  IAllUsersDataResponse,
+  IUser,
+} from "@/app/types";
+// import { IAllUsersResponse, IUser } from "@/app/types";
 import { apiSlice } from "../../api/apiSlice";
 
 export const usersApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAllUsers: builder.query<IUser[], void>({
       query: () => ({
-        url: "/customer-mgt/all-users",
+        url: "users",
         method: "GET",
         validateStatus: (response, result) => {
           return response.status === 200 && !result.isError;
@@ -23,8 +28,8 @@ export const usersApiSlice = apiSlice.injectEndpoints({
               { type: "users", id: "LIST" },
             ]
           : [{ type: "users", id: "LIST" }],
-      transformResponse: (response: IAllUsersResponse) => {
-        return response.payload.users[0];
+      transformResponse: (response: IAllUsersAPIResponse) => {
+        return response.payload.data;
       },
     }),
   }),

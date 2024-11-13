@@ -4,17 +4,18 @@ export interface IChildren {
   children: React.ReactNode;
 }
 
-export interface User {
+export interface IUser {
   id: string;
   email: string;
   userName: string;
   roleId: string;
   status: string;
-  password?: string;
+  password: string;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
   deleted: boolean;
+  role: any;
 }
 
 export interface IDecoded {
@@ -22,4 +23,17 @@ export interface IDecoded {
   exp: Date;
   iat: any;
   role: Role;
+}
+
+export interface IAllUsersDataResponse {
+  data: IUser[];
+  limit: number;
+  page: number;
+  total: number;
+  totalPages: number;
+}
+export interface IAllUsersAPIResponse {
+  success: boolean;
+  message: string;
+  payload: IAllUsersDataResponse;
 }

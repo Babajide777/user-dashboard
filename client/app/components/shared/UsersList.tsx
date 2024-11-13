@@ -23,7 +23,8 @@ import {
   Box,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
-import { User } from "@/app/types";
+import { IUser } from "@/app/types";
+import { useGetAllUsersQuery } from "@/app/store/Features/users/usersApiSlice";
 
 const roles = [
   { id: "1", name: "Admin" },
@@ -31,47 +32,27 @@ const roles = [
 ];
 
 const UserList: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<IUser[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [open, setOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<IUser | null>(null);
 
-  // Fetch users from API
-  const fetchUsers = async () => {
-    // Replace with your API call
-    const data: User[] = [
-      {
-        id: "1",
-        email: "john@example.com",
-        userName: "john_doe",
-        roleId: "1",
-        status: "active",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deleted: false,
-      },
-      {
-        id: "2",
-        email: "jane@example.com",
-        userName: "jane_doe",
-        roleId: "2",
-        status: "inactive",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deleted: false,
-      },
-      // Add more mock data or fetch from backend
-    ];
-    setUsers(data);
-  };
+  const {
+    data: allUsersData,
+    isLoading: isLoadingUsers,
+    refetch,
+  } = useGetAllUsersQuery();
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    refetch();
+    if (allUsersData) {
+      setUsers(allUsersData);
+    }
+  }, [allUsersData]);
 
   // Handle open dialog for adding/updating user
-  const handleOpen = (user: User | null) => {
+  const handleOpen: any = (user: IUser | null) => {
     setCurrentUser(user);
     setOpen(true);
   };
@@ -90,7 +71,7 @@ const UserList: React.FC = () => {
       } else {
         // Add user API call here
       }
-      fetchUsers();
+      refetch();
       handleClose();
     }
   };
@@ -136,6 +117,14 @@ const UserList: React.FC = () => {
         </Button>
       </Box>
 
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => handleOpen(null)}
+      >
+        Add User
+      </Button>
+
       <TableContainer component={Paper} style={{ marginTop: "20px" }}>
         <Table>
           <TableHead>
@@ -154,10 +143,7 @@ const UserList: React.FC = () => {
                 <TableRow key={user.id}>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.userName}</TableCell>
-                  <TableCell>
-                    {roles.find((role) => role.id === user.roleId)?.name ||
-                      "Unknown"}
-                  </TableCell>
+                  <TableCell>{user.role.name}</TableCell>
                   <TableCell>{user.status}</TableCell>
                   <TableCell>
                     <IconButton
