@@ -15,6 +15,13 @@ export class UsersQueryService {
         email,
         deleted: false,
       },
+      include: {
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
   }
 
@@ -24,6 +31,13 @@ export class UsersQueryService {
         userName,
         deleted: false,
       },
+      include: {
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
   }
 
@@ -32,6 +46,13 @@ export class UsersQueryService {
       where: {
         id,
         deleted: false,
+      },
+      include: {
+        role: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
   }
@@ -64,6 +85,13 @@ export class UsersQueryService {
       skip: offset,
       take: Number(limit),
       where: { deleted: false },
+      include: {
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
 
     return {
