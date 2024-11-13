@@ -21,20 +21,21 @@ import {
   TextField,
   MenuItem,
   Box,
+  Select,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import { IUser } from "@/app/types";
-import { useGetAllUsersQuery } from "@/app/store/Features/users/usersApiSlice";
-
-const roles = [
-  { id: "1", name: "Admin" },
-  { id: "2", name: "User" },
-];
+import {
+  useCreateUserMutation,
+  useGetAllUsersQuery,
+} from "@/app/store/Features/users/usersApiSlice";
+import { useGetAllRolesQuery } from "@/app/store/Features/roles/rolesApiSlice";
+import { toast } from "react-toastify";
 
 const UserList: React.FC = () => {
   const [users, setUsers] = useState<IUser[]>([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [open, setOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
 
@@ -44,6 +45,12 @@ const UserList: React.FC = () => {
     refetch,
   } = useGetAllUsersQuery();
 
+  const {
+    data: allRoles,
+    isLoading: isLoadingRoles,
+    refetch: refetchRoles,
+  } = useGetAllRolesQuery();
+
   useEffect(() => {
     refetch();
     if (allUsersData) {
@@ -51,37 +58,75 @@ const UserList: React.FC = () => {
     }
   }, [allUsersData]);
 
-  // Handle open dialog for adding/updating user
+  useEffect(() => {
+    refetchRoles();
+  }, []);
+
+  const [createUser] = useCreateUserMutation();
+
   const handleOpen: any = (user: IUser | null) => {
     setCurrentUser(user);
     setOpen(true);
   };
 
-  // Handle close dialog
   const handleClose = () => {
     setOpen(false);
     setCurrentUser(null);
   };
 
-  // Handle save user (either add or update)
   const handleSaveUser = async () => {
-    if (currentUser) {
-      if (currentUser.id) {
-        // Update user API call here
+    try {
+      const { success, message, payload } = await createUser(
+        currentUser
+      ).unwrap();
+
+      if (success) {
+        toast.success(`${message}`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        refetch();
+        handleClose();
       } else {
-        // Add user API call here
+        toast.error(`${message}`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
       }
-      refetch();
-      handleClose();
+    } catch (error: any) {
+      let msg =
+        error.message ||
+        (error.data && error.data.message) ||
+        "An error occurred";
+      toast.error(`${msg}`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     }
   };
 
-  // Handle delete user
   const handleDeleteUser = async (userId: string) => {
     setUsers(users.filter((user) => user.id !== userId));
   };
 
-  // Handle pagination change
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
@@ -207,12 +252,13 @@ const UserList: React.FC = () => {
               setCurrentUser({ ...currentUser!, roleId: e.target.value })
             }
           >
-            {roles.map((role) => (
+            {allRoles?.map((role) => (
               <MenuItem key={role.id} value={role.id}>
                 {role.name}
               </MenuItem>
             ))}
           </TextField>
+
           <TextField
             margin="dense"
             label="Status"

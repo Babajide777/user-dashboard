@@ -32,8 +32,15 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         return response.payload.data;
       },
     }),
+    createUser: builder.mutation({
+      query: (credentials) => ({
+        url: "users",
+        method: "POST",
+        body: { ...credentials },
+      }),
+    }),
   }),
   overrideExisting: true,
 });
 
-export const { useGetAllUsersQuery } = usersApiSlice;
+export const { useGetAllUsersQuery, useCreateUserMutation } = usersApiSlice;

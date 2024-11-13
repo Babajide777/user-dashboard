@@ -23,14 +23,14 @@ export class UsersService {
 
     const checkEmail = await this.usersQueryService.findUserByEmail(item.email);
 
-    if (!checkEmail)
+    if (checkEmail)
       throw new BadRequestException('A user with this email already exist');
 
     const checkUserName = await this.usersQueryService.findUserByUserName(
       item.userName,
     );
 
-    if (!checkUserName)
+    if (checkUserName)
       throw new BadRequestException('A user with this userName already exist');
 
     const hashedPassword =

@@ -37,3 +37,20 @@ export interface IAllUsersAPIResponse {
   message: string;
   payload: IAllUsersDataResponse;
 }
+
+export interface IRole {
+  id: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date;
+  deleted: boolean;
+}
+
+export interface IAllRolesAPIResponse {
+  success: boolean;
+  message: string;
+  payload: {
+    roles: IRole[];
+  };
+}

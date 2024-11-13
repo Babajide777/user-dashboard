@@ -14,9 +14,9 @@ const RequireUser: React.FC<IChildren> = ({ children }) => {
     if (!(isUser || isAdmin)) {
       router.push("/");
     }
-  }, [isUser, router]);
+  }, [isUser, isAdmin, router]);
 
-  if (!isUser) {
+  if (!(isUser || isAdmin)) {
     return null;
   }
 

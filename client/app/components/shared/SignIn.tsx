@@ -20,8 +20,6 @@ const SignIn: React.FC = () => {
     e.preventDefault();
 
     try {
-      e.preventDefault();
-
       const { success, message, payload } = await login({
         email,
         password,
