@@ -1,34 +1,47 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Public } from 'src/utils/custom-decorators/public-route.decorator';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
+import { VerifyOtpResponseDto } from './dto/verify-otp-response.dto';
+import { FailResponseDto } from './dto/fail-response.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { IResponse } from 'src/utils/response/response.type';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @Public()
+  @Post('login')
+  @ApiOperation({ summary: 'Login User' })
+  @ApiOkResponse({
+    status: 200,
+    description: 'User logged-in successfully',
+    type: VerifyOtpResponseDto,
+  })
+  @ApiBadRequestResponse({
+    status: 400,
+    description: 'Unable to login user',
+    type: FailResponseDto,
+  })
+  @ApiBody({ type: LoginUserDto })
+  @HttpCode(HttpStatus.OK)
+  async loginUser(@Body() loginUserDto: LoginUserDto): Promise<IResponse> {
+    return await this.authService.loginUser(loginUserDto);
   }
 }

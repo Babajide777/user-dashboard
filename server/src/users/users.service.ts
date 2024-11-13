@@ -1,11 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ResponseService } from 'src/utils/response/response.service';
+import { PasswordHashService } from 'src/utils/password-hash/password-hash.service';
+import { UsersQueryService } from './users-query/users-query.service';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    private readonly responseService: ResponseService,
+    private readonly passwordHashService: PasswordHashService,
+    private readonly usersQueryService: UsersQueryService,
+  ) {}
+
+  async createUser(createUserDto: CreateUserDto) {
+    const { password, ...item } = createUserDto;
+
+    const hashedPassword =
+      await this.passwordHashService.hashPassword(password);
+
+    const user = await this.usersQueryService.createUser({
+      ...item,
+      password: hashedPassword,
+    });
+
+    return this.responseService.response(true, 'User created successfully', {
+      user,
+    });
   }
 
   findAll() {

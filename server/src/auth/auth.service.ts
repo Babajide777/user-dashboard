@@ -1,26 +1,39 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { LoginUserDto } from './dto/login-user.dto';
+import { IResponse } from 'src/utils/response/response.type';
+import { PasswordHashService } from 'src/utils/password-hash/password-hash.service';
+import { JwtService } from '@nestjs/jwt';
+import { ResponseService } from 'src/utils/response/response.service';
+import { UsersQueryService } from 'src/users/users-query/users-query.service';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
-  }
+  constructor(
+    private readonly passwordHashService: PasswordHashService,
+    private readonly responseService: ResponseService,
+    private readonly jwtService: JwtService,
+    private readonly usersQueryService: UsersQueryService,
+  ) {}
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async loginUser(loginUserDto: LoginUserDto): Promise<IResponse> {
+    const checkEmail = await this.usersQueryService.findUserByEmail(
+      loginUserDto.email,
+    );
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+    if (!checkEmail) throw new BadRequestException('Wrong email or password');
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
+    const passCheck = await this.passwordHashService.validatePassword(
+      loginUserDto.password,
+      checkEmail.password,
+    );
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    if (!passCheck) throw new BadRequestException('Wrong email or password');
+
+    let token = this.jwtService.sign({ id: checkEmail.id });
+
+    return this.responseService.response(true, 'User logged-in successfully', {
+      user: checkEmail,
+      token,
+    });
   }
 }

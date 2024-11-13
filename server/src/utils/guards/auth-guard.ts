@@ -7,8 +7,8 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { JWT_SECRET } from 'src/config/env';
 import { UsersQueryService } from 'src/users/users-query/users-query.service';
+import { JWT_SECRET } from '../env';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -38,14 +38,12 @@ export class JwtAuthGuard implements CanActivate {
         secret: JWT_SECRET as string,
       });
 
-      const theUser = await this.usersQueryService.findUserByID(payload.id);
+      const theUser = await this.usersQueryService.findUserById(payload.id);
 
       if (!theUser) {
         throw new UnauthorizedException();
       }
       request['user'] = theUser.id;
-      request['business'] = theUser.businessId;
-      request['store'] = theUser.storeId;
     } catch {
       throw new UnauthorizedException();
     }

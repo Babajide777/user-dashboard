@@ -19,7 +19,7 @@ async function main() {
     update: {},
     create: {
       email: 'admin@example.com',
-      username: 'adminUser',
+      userName: 'adminUser',
       status: 'active',
       password: 'secureAdminPassword',
       roleId: adminRole.id,
@@ -31,7 +31,7 @@ async function main() {
     update: {},
     create: {
       email: 'user@example.com',
-      username: 'regularUser',
+      userName: 'regularUser',
       status: 'active',
       password: 'secureUserPassword',
       roleId: userRole.id,

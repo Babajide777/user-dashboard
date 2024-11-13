@@ -1,34 +1,49 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  Req,
+  HttpStatus,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
+import { FailResponseDto } from 'src/auth/dto/fail-response.dto';
+import { IResponse } from 'src/utils/response/response.type';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @Post('')
+  @ApiOperation({ summary: 'Create User' })
+  @ApiCreatedResponse({
+    status: 201,
+    description: 'User created successfully',
+    // type: CreateEmployeesResponseDto,
+  })
+  @ApiBadRequestResponse({
+    status: 400,
+    description: 'Unable to create user',
+    type: FailResponseDto,
+  })
+  @ApiBody({ type: CreateUserDto })
+  @HttpCode(HttpStatus.CREATED)
+  async createUser(
+    @Req() req: any,
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<IResponse> {
+    return this.usersService.createUser(createUserDto);
   }
 }
