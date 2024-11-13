@@ -27,6 +27,7 @@ import { Edit, Delete } from "@mui/icons-material";
 import { IUser } from "@/app/types";
 import {
   useCreateUserMutation,
+  useDeleteProductMutation,
   useGetAllUsersQuery,
 } from "@/app/store/Features/users/usersApiSlice";
 import { useGetAllRolesQuery } from "@/app/store/Features/roles/rolesApiSlice";
@@ -63,6 +64,7 @@ const UserList: React.FC = () => {
   }, []);
 
   const [createUser] = useCreateUserMutation();
+  const [deleteUser] = useDeleteProductMutation();
 
   const handleOpen: any = (user: IUser | null) => {
     setCurrentUser(user);
@@ -123,8 +125,53 @@ const UserList: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    setUsers(users.filter((user) => user.id !== userId));
+  const handleDeleteUser = async (id: string) => {
+    try {
+      const { success, message, payload } = await deleteUser(id).unwrap();
+
+      console.log({ success, message });
+
+      if (success) {
+        toast.success(`${message}`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        refetch();
+        handleClose();
+      } else {
+        toast.error(`${message}`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+    } catch (error: any) {
+      let msg =
+        error.message ||
+        (error.data && error.data.message) ||
+        "An error occurred";
+      toast.error(`${msg}`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {

@@ -5,7 +5,6 @@ import {
   IAllUsersDataResponse,
   IUser,
 } from "@/app/types";
-// import { IAllUsersResponse, IUser } from "@/app/types";
 import { apiSlice } from "../../api/apiSlice";
 
 export const usersApiSlice = apiSlice.injectEndpoints({
@@ -39,8 +38,21 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         body: { ...credentials },
       }),
     }),
+    deleteProduct: builder.mutation({
+      query: (id) => {
+        return {
+          url: `users/${id}`,
+          method: "DELETE",
+        };
+      },
+      invalidatesTags: [{ type: "users", id: "LIST" }],
+    }),
   }),
   overrideExisting: true,
 });
 
-export const { useGetAllUsersQuery, useCreateUserMutation } = usersApiSlice;
+export const {
+  useGetAllUsersQuery,
+  useCreateUserMutation,
+  useDeleteProductMutation,
+} = usersApiSlice;
