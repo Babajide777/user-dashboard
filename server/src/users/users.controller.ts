@@ -21,6 +21,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
+  ApiTags,
 } from '@nestjs/swagger';
 import { FailResponseDto } from 'src/auth/dto/fail-response.dto';
 import { IResponse } from 'src/utils/response/response.type';
@@ -28,6 +29,7 @@ import { EditUserDto } from './dto/edit-user.dto';
 import { SuccessResponseDto } from 'src/auth/dto/success-response.dto';
 import { PaginationDto } from './dto/pagination.dto';
 
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -73,7 +75,7 @@ export class UsersController {
   }
 
   @Delete(':userId')
-  @ApiOperation({ summary: 'Delete User' })
+  @ApiOperation({ summary: 'Delete user' })
   @ApiOkResponse({
     status: 200,
     description: 'User deleted successfully',
@@ -101,7 +103,7 @@ export class UsersController {
   })
   @ApiBadRequestResponse({
     status: 400,
-    description: 'Unable to retrieve customer groups',
+    description: 'Unable to retrieve all users',
     type: FailResponseDto,
   })
   @ApiQuery({ name: 'limit', required: false, type: String })

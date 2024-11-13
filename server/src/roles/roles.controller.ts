@@ -1,34 +1,46 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiOkResponse,
+  ApiBadRequestResponse,
+} from '@nestjs/swagger';
+import { FailResponseDto } from 'src/auth/dto/fail-response.dto';
+import { SuccessResponseDto } from 'src/auth/dto/success-response.dto';
+import { IResponse } from 'src/utils/response/response.type';
 
+@ApiTags('roles')
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
-  @Post()
-  create(@Body() createRoleDto: CreateRoleDto) {
-    return this.rolesService.create(createRoleDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.rolesService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.rolesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-    return this.rolesService.update(+id, updateRoleDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.rolesService.remove(+id);
+  @Get('')
+  @ApiOperation({ summary: 'Get all roles' })
+  @ApiOkResponse({
+    status: 200,
+    description: 'All roles retrieved successfully',
+    type: SuccessResponseDto,
+  })
+  @ApiBadRequestResponse({
+    status: 400,
+    description: 'Unable to retrieve all roles',
+    type: FailResponseDto,
+  })
+  @HttpCode(HttpStatus.OK)
+  async allUsers(): Promise<IResponse> {
+    return this.rolesService.allRoles();
   }
 }
