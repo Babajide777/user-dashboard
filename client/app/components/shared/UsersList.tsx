@@ -41,7 +41,8 @@ const UserList: React.FC = () => {
   const [users, setUsers] = useState<IUser[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [open, setOpen] = useState(false);
+  const [openAdd, setOpenAdd] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
 
   const dispatch = useDispatch();
@@ -77,17 +78,77 @@ const UserList: React.FC = () => {
   const [deleteUser] = useDeleteUserMutation();
   const [editUser] = useEditUserMutation();
 
-  const handleOpen: any = (user: IUser | null) => {
+  const handleOpenAdd: any = (user: IUser | null) => {
     setCurrentUser(user);
-    setOpen(true);
+    setOpenAdd(true);
+  };
+
+  const handleOpenEdit: any = (user: IUser | null) => {
+    setCurrentUser(user);
+    setOpenEdit(true);
   };
 
   const handleClose = () => {
-    setOpen(false);
+    setOpenAdd(false);
+    setOpenEdit(false);
     setCurrentUser(null);
   };
 
   const handleSaveUser = async () => {
+    if (currentUser) {
+      try {
+        const { success, message, payload } = await createUser(
+          currentUser
+        ).unwrap();
+
+        if (success) {
+          toast.success(`${message}`, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+          refetch();
+          handleClose();
+        } else {
+          toast.error(`${message}`, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        }
+      } catch (error: any) {
+        let msg =
+          error.message ||
+          (error.data && error.data.message) ||
+          "An error occurred";
+        toast.error(`${msg}`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+      if (currentUser.id) {
+      } else {
+      }
+    }
+  };
+
+  const handleEditUser = async () => {
     if (currentUser) {
       if (currentUser.id) {
         const { id, roleId, status } = currentUser;
@@ -141,53 +202,6 @@ const UserList: React.FC = () => {
           });
         }
         console.log({ currentUser });
-      } else {
-        try {
-          const { success, message, payload } = await createUser(
-            currentUser
-          ).unwrap();
-
-          if (success) {
-            toast.success(`${message}`, {
-              position: "top-right",
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            });
-            refetch();
-            handleClose();
-          } else {
-            toast.error(`${message}`, {
-              position: "top-right",
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            });
-          }
-        } catch (error: any) {
-          let msg =
-            error.message ||
-            (error.data && error.data.message) ||
-            "An error occurred";
-          toast.error(`${msg}`, {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-        }
       }
     }
   };
@@ -296,7 +310,7 @@ const UserList: React.FC = () => {
       <Button
         variant="contained"
         color="primary"
-        onClick={() => handleOpen(null)}
+        onClick={() => handleOpenAdd(null)}
       >
         Add User
       </Button>
@@ -324,7 +338,7 @@ const UserList: React.FC = () => {
                   <TableCell>
                     <IconButton
                       color="primary"
-                      onClick={() => handleOpen(user)}
+                      onClick={() => handleOpenEdit(user)}
                     >
                       <Edit />
                     </IconButton>
@@ -349,8 +363,80 @@ const UserList: React.FC = () => {
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{currentUser ? "Edit User" : "Add User"}</DialogTitle>
+      <Dialog open={openAdd} onClose={handleClose}>
+        <DialogTitle>{"Add User"}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Email"
+            type="email"
+            fullWidth
+            value={currentUser?.email || ""}
+            onChange={(e) =>
+              setCurrentUser({ ...currentUser!, email: e.target.value })
+            }
+          />
+          <TextField
+            margin="dense"
+            label="User Name"
+            type="text"
+            fullWidth
+            value={currentUser?.userName || ""}
+            onChange={(e) =>
+              setCurrentUser({ ...currentUser!, userName: e.target.value })
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Role"
+            select
+            fullWidth
+            value={currentUser?.roleId || ""}
+            onChange={(e) =>
+              setCurrentUser({ ...currentUser!, roleId: e.target.value })
+            }
+          >
+            {allRoles?.map((role) => (
+              <MenuItem key={role.id} value={role.id}>
+                {role.name}
+              </MenuItem>
+            ))}
+          </TextField>
+
+          <TextField
+            margin="dense"
+            label="Status"
+            type="text"
+            fullWidth
+            value={currentUser?.status || ""}
+            onChange={(e) =>
+              setCurrentUser({ ...currentUser!, status: e.target.value })
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Password"
+            type="password"
+            fullWidth
+            value={currentUser?.password || ""}
+            onChange={(e) =>
+              setCurrentUser({ ...currentUser!, password: e.target.value })
+            }
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleSaveUser} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openEdit} onClose={handleClose}>
+        <DialogTitle>{"Edit User"}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -418,7 +504,7 @@ const UserList: React.FC = () => {
           <Button onClick={handleClose} color="secondary">
             Cancel
           </Button>
-          <Button onClick={handleSaveUser} color="primary">
+          <Button onClick={handleEditUser} color="primary">
             Save
           </Button>
         </DialogActions>
