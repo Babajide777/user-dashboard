@@ -3,7 +3,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store";
 
-const API_URL = "http://localhost:4000";
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://user-dashboard-47ds.onrender.com"
+    : "http://localhost:4000";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: API_URL,
