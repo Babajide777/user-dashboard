@@ -38,8 +38,6 @@ export class JwtAuthGuard implements CanActivate {
         secret: JWT_SECRET as string,
       });
 
-      console.log({ payload });
-
       const theUser = await this.usersQueryService.findUserById(payload.id);
 
       if (!theUser) {
