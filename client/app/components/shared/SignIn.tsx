@@ -2,15 +2,79 @@
 
 import React, { useState } from "react";
 import { Container, TextField, Button, Typography, Box } from "@mui/material";
+import { useLoginMutation } from "@/app/store/Features/auth/authApiSlice";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { setCredentials } from "@/app/store/Features/auth/authSlice";
+import { toast } from "react-toastify";
 
 const SignIn: React.FC = () => {
+  const [login, { isLoading }] = useLoginMutation();
+  const dispatch = useDispatch();
+  const router = useRouter();
+
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    // Add your form submission logic here
-    console.log({ email, password });
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+
+    try {
+      e.preventDefault();
+
+      const { success, message, payload } = await login({
+        email,
+        password,
+      }).unwrap();
+
+      if (success) {
+        dispatch(
+          setCredentials({
+            token: payload.token,
+          })
+        );
+
+        toast.success(`${message}`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        setTimeout(() => {
+          router.push("/users");
+        }, 5000);
+      } else {
+        toast.error(`${message}`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+    } catch (error: any) {
+      let msg =
+        error.message ||
+        (error.data && error.data.message) ||
+        "An error occurred";
+      toast.error(`${msg}`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
   };
 
   return (
