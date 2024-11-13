@@ -46,14 +46,6 @@ export class UsersService {
     });
   }
 
-  findAll() {
-    return `This action returns all users`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
   async editUser(userId: string, editUserDto: EditUserDto) {
     const user = await this.usersQueryService.editUser(userId, editUserDto);
 
@@ -64,7 +56,16 @@ export class UsersService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async deleteUser(userId: string) {
+    const user = await this.usersQueryService.editUser(userId, {
+      deleted: true,
+      deletedAt: new Date(Date.now()),
+    });
+
+    if (!user) throw new UnprocessableEntityException('Error deleting  user');
+
+    return this.responseService.response(true, 'User deleted successfully', {
+      user,
+    });
   }
 }

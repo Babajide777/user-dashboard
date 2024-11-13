@@ -24,6 +24,7 @@ import {
 import { FailResponseDto } from 'src/auth/dto/fail-response.dto';
 import { IResponse } from 'src/utils/response/response.type';
 import { EditUserDto } from './dto/edit-user.dto';
+import { SuccessResponseDto } from 'src/auth/dto/success-response.dto';
 
 @Controller('users')
 export class UsersController {
@@ -67,5 +68,25 @@ export class UsersController {
     userId: string,
   ): Promise<IResponse> {
     return this.usersService.editUser(userId, editUserDto);
+  }
+
+  @Delete(':userId')
+  @ApiOperation({ summary: 'Delete User' })
+  @ApiOkResponse({
+    status: 200,
+    description: 'User deleted successfully',
+    type: SuccessResponseDto,
+  })
+  @ApiBadRequestResponse({
+    status: 400,
+    description: 'Error deleting user',
+    type: FailResponseDto,
+  })
+  @HttpCode(HttpStatus.OK)
+  async deleteRole(
+    @Param('userId')
+    userId: string,
+  ): Promise<IResponse> {
+    return await this.usersService.deleteUser(userId);
   }
 }

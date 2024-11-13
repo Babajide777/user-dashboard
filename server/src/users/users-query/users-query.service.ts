@@ -12,6 +12,7 @@ export class UsersQueryService {
     return await this.prismaService.user.findUnique({
       where: {
         email,
+        deleted: false,
       },
     });
   }
@@ -20,6 +21,7 @@ export class UsersQueryService {
     return await this.prismaService.user.findUnique({
       where: {
         userName,
+        deleted: false,
       },
     });
   }
@@ -28,6 +30,7 @@ export class UsersQueryService {
     return await this.prismaService.user.findUnique({
       where: {
         id,
+        deleted: false,
       },
     });
   }
@@ -38,12 +41,12 @@ export class UsersQueryService {
     });
   }
 
-  async editUser(id: string, data: Partial<EditUserDto>) {
+  async editUser(id: string, data: Partial<User>) {
     return await this.prismaService.user.update({
       where: {
         id,
       },
-      data,
+      data: { ...data, updatedAt: new Date(Date.now()) },
     });
   }
 }
