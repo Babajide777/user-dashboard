@@ -55,7 +55,11 @@ async function bootstrap() {
     }),
   );
 
-  const allowedOrigins = ['*', 'http://localhost:3000'];
+  const allowedOrigins = [
+    '*',
+    'http://localhost:3000',
+    'https://user-dashboard-rouge.vercel.app/',
+  ];
   app.enableCors({
     origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
