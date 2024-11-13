@@ -9,9 +9,9 @@ import { apiSlice } from "../../api/apiSlice";
 
 export const usersApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getAllUsers: builder.query<IUser[], void>({
-      query: () => ({
-        url: "users",
+    getAllUsers: builder.query<IUser[], { page: number; limit: number }>({
+      query: (data) => ({
+        url: `users?page=${data.page}&limit=${data.limit}`,
         method: "GET",
         validateStatus: (response, result) => {
           return response.status === 200 && !result.isError;

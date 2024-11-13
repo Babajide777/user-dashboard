@@ -44,7 +44,10 @@ const UserList: React.FC = () => {
     data: allUsersData,
     isLoading: isLoadingUsers,
     refetch,
-  } = useGetAllUsersQuery();
+  } = useGetAllUsersQuery({
+    page: page + 1,
+    limit: rowsPerPage,
+  });
 
   const {
     data: allRoles,
@@ -57,7 +60,7 @@ const UserList: React.FC = () => {
     if (allUsersData) {
       setUsers(allUsersData);
     }
-  }, [allUsersData]);
+  }, [allUsersData, page, rowsPerPage]);
 
   useEffect(() => {
     refetchRoles();
@@ -128,8 +131,6 @@ const UserList: React.FC = () => {
   const handleDeleteUser = async (id: string) => {
     try {
       const { success, message, payload } = await deleteUser(id).unwrap();
-
-      console.log({ success, message });
 
       if (success) {
         toast.success(`${message}`, {
