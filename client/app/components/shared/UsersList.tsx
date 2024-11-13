@@ -32,6 +32,9 @@ import {
 } from "@/app/store/Features/users/usersApiSlice";
 import { useGetAllRolesQuery } from "@/app/store/Features/roles/rolesApiSlice";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { logOut } from "@/app/store/Features/auth/authSlice";
 
 const UserList: React.FC = () => {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -39,6 +42,9 @@ const UserList: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [open, setOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
+
+  const dispatch = useDispatch();
+  const router = useRouter();
 
   const {
     data: allUsersData,
@@ -186,6 +192,25 @@ const UserList: React.FC = () => {
     setPage(0);
   };
 
+  const handleLogout = async () => {
+    dispatch(logOut({}));
+
+    toast.info(`Log out successful`, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+
+    setTimeout(() => {
+      router.push("/");
+    }, 3000);
+  };
+
   return (
     <Container>
       <Box
@@ -203,7 +228,7 @@ const UserList: React.FC = () => {
         <Button
           variant="contained"
           color="error"
-          //   onClick={() => handleOpen(null)}
+          onClick={() => handleLogout()}
           size="small"
         >
           Logout
