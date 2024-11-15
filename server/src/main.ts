@@ -58,7 +58,7 @@ async function bootstrap() {
   const allowedOrigins = [
     '*',
     'http://localhost:3000',
-    'https://user-dashboard-rouge.vercel.app/',
+    'https://user-dashboard-rouge.vercel.app',
   ];
   app.enableCors({
     origin: allowedOrigins,
