@@ -37,7 +37,7 @@ import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { logOut } from "@/app/store/Features/auth/authSlice";
-import { userSchema } from "@/app/utils/validation";
+import { editUserSchema, userSchema } from "@/app/utils/validation";
 
 const UserList: React.FC = () => {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -119,6 +119,23 @@ const UserList: React.FC = () => {
     return true;
   };
 
+  const validateEdit = () => {
+    const result = editUserSchema.safeParse(currentUser);
+
+    if (!result.success) {
+      const errorObj: Record<string, string> = {};
+      result.error.errors.forEach((error) => {
+        if (error.path[0]) {
+          errorObj[error.path[0] as string] = error.message;
+        }
+      });
+      setErrors(errorObj);
+      return false;
+    }
+    setErrors({});
+    return true;
+  };
+
   const handleOpenAdd: any = (user: IUser | null) => {
     setOpenAdd(true);
     setCurrentUser(
@@ -141,6 +158,7 @@ const UserList: React.FC = () => {
   const handleOpenEdit: any = (user: IUser | null) => {
     setCurrentUser(user);
     setOpenEdit(true);
+    setErrors({});
   };
 
   const handleClose = () => {
@@ -215,6 +233,9 @@ const UserList: React.FC = () => {
   };
 
   const handleEditUser = async () => {
+    if (!validateEdit()) return;
+
+    setIsLoading(true);
     if (currentUser) {
       if (currentUser.id) {
         const { id, roleId, status } = currentUser;
@@ -250,8 +271,11 @@ const UserList: React.FC = () => {
               progress: undefined,
               theme: "light",
             });
+            setIsLoading(false);
           }
         } catch (error: any) {
+          setIsLoading(false);
+
           let msg =
             error.message ||
             (error.data && error.data.message) ||
@@ -267,7 +291,6 @@ const UserList: React.FC = () => {
             theme: "light",
           });
         }
-        console.log({ currentUser });
       }
     }
   };
@@ -522,7 +545,16 @@ const UserList: React.FC = () => {
 
       <Dialog open={openEdit} onClose={handleClose}>
         <DialogTitle>{"Edit User"}</DialogTitle>
-        <DialogContent>
+        {Object.keys(errors).length > 0 && (
+          <Box mt={2} ml={3}>
+            {Object.entries(errors).map(([field, message]) => (
+              <Typography key={field} color="error">
+                {message}
+              </Typography>
+            ))}
+          </Box>
+        )}
+        {/* <DialogContent>
           <TextField
             autoFocus
             margin="dense"
@@ -584,13 +616,45 @@ const UserList: React.FC = () => {
               setCurrentUser({ ...currentUser!, password: e.target.value })
             }
           />
+        </DialogContent> */}
+
+        <DialogContent>
+          <TextField
+            label="Role"
+            select
+            fullWidth
+            margin="dense"
+            value={currentUser?.roleId || ""}
+            onChange={(e) =>
+              setCurrentUser({ ...currentUser!, roleId: e.target.value })
+            }
+            error={!!errors.roleId}
+            helperText={errors.roleId}
+          >
+            {allRoles?.map((role) => (
+              <MenuItem key={role.id} value={role.id}>
+                {role.name}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            label="Status"
+            fullWidth
+            margin="dense"
+            value={currentUser?.status || ""}
+            onChange={(e) =>
+              setCurrentUser({ ...currentUser!, status: e.target.value })
+            }
+            error={!!errors.status}
+            helperText={errors.status}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary">
             Cancel
           </Button>
           <Button onClick={handleEditUser} color="primary">
-            Save
+            {isLoading ? <CircularProgress size={24} /> : "Save"}
           </Button>
         </DialogActions>
       </Dialog>

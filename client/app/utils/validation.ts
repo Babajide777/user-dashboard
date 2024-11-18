@@ -12,3 +12,8 @@ export const userSchema = z.object({
   status: z.string().min(1, "Status is required"),
   password: z.string().min(8, "Password must be at least 8 characters long"),
 });
+
+export const editUserSchema = z.object({
+  roleId: z.string().min(1, "Role is required"),
+  status: z.string().min(1, "Status is required"),
+});
