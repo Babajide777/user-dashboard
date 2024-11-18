@@ -47,7 +47,6 @@ const UserList: React.FC = () => {
   const [openEdit, setOpenEdit] = useState(false);
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [openDialog, setOpenDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const dispatch = useDispatch();
@@ -82,25 +81,6 @@ const UserList: React.FC = () => {
   const [createUser] = useCreateUserMutation();
   const [deleteUser] = useDeleteUserMutation();
   const [editUser] = useEditUserMutation();
-
-  const handleOpenDialog = (user: any | null) => {
-    setCurrentUser(
-      user || {
-        email: "",
-        userName: "",
-        roleId: "",
-        status: "",
-        password: "",
-      }
-    );
-    setErrors({});
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setCurrentUser(null);
-  };
 
   const validate = () => {
     const result = userSchema.safeParse(currentUser);
@@ -554,70 +534,6 @@ const UserList: React.FC = () => {
             ))}
           </Box>
         )}
-        {/* <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Email"
-            type="email"
-            fullWidth
-            disabled={currentUser ? true : false}
-            value={currentUser?.email || ""}
-            onChange={(e) =>
-              setCurrentUser({ ...currentUser!, email: e.target.value })
-            }
-          />
-          <TextField
-            margin="dense"
-            label="User Name"
-            type="text"
-            fullWidth
-            value={currentUser?.userName || ""}
-            disabled={currentUser ? true : false}
-            onChange={(e) =>
-              setCurrentUser({ ...currentUser!, userName: e.target.value })
-            }
-          />
-          <TextField
-            margin="dense"
-            label="Role"
-            select
-            fullWidth
-            value={currentUser?.roleId || ""}
-            onChange={(e) =>
-              setCurrentUser({ ...currentUser!, roleId: e.target.value })
-            }
-          >
-            {allRoles?.map((role) => (
-              <MenuItem key={role.id} value={role.id}>
-                {role.name}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <TextField
-            margin="dense"
-            label="Status"
-            type="text"
-            fullWidth
-            value={currentUser?.status || ""}
-            onChange={(e) =>
-              setCurrentUser({ ...currentUser!, status: e.target.value })
-            }
-          />
-          <TextField
-            margin="dense"
-            label="Password"
-            type="password"
-            fullWidth
-            value={currentUser?.password || ""}
-            disabled={currentUser ? true : false}
-            onChange={(e) =>
-              setCurrentUser({ ...currentUser!, password: e.target.value })
-            }
-          />
-        </DialogContent> */}
-
         <DialogContent>
           <TextField
             label="Role"
