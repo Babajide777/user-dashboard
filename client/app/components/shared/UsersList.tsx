@@ -22,6 +22,7 @@ import {
   MenuItem,
   Box,
   Select,
+  CircularProgress,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import { IUser } from "@/app/types";
@@ -36,6 +37,7 @@ import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { logOut } from "@/app/store/Features/auth/authSlice";
+import { userSchema } from "@/app/utils/validation";
 
 const UserList: React.FC = () => {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -44,6 +46,9 @@ const UserList: React.FC = () => {
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [openDialog, setOpenDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -78,9 +83,59 @@ const UserList: React.FC = () => {
   const [deleteUser] = useDeleteUserMutation();
   const [editUser] = useEditUserMutation();
 
+  const handleOpenDialog = (user: any | null) => {
+    setCurrentUser(
+      user || {
+        email: "",
+        userName: "",
+        roleId: "",
+        status: "",
+        password: "",
+      }
+    );
+    setErrors({});
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setCurrentUser(null);
+  };
+
+  const validate = () => {
+    const result = userSchema.safeParse(currentUser);
+
+    if (!result.success) {
+      const errorObj: Record<string, string> = {};
+      result.error.errors.forEach((error) => {
+        if (error.path[0]) {
+          errorObj[error.path[0] as string] = error.message;
+        }
+      });
+      setErrors(errorObj);
+      return false;
+    }
+    setErrors({});
+    return true;
+  };
+
   const handleOpenAdd: any = (user: IUser | null) => {
-    setCurrentUser(user);
     setOpenAdd(true);
+    setCurrentUser(
+      user || {
+        email: "",
+        userName: "",
+        roleId: "",
+        status: "",
+        password: "",
+        id: "",
+        createdAt: new Date(),
+        deleted: false,
+        role: "",
+        updatedAt: new Date(),
+      }
+    );
+    setErrors({});
   };
 
   const handleOpenEdit: any = (user: IUser | null) => {
@@ -92,14 +147,22 @@ const UserList: React.FC = () => {
     setOpenAdd(false);
     setOpenEdit(false);
     setCurrentUser(null);
+    setIsLoading(false);
   };
 
   const handleSaveUser = async () => {
+    if (!validate()) return;
+
+    setIsLoading(true);
     if (currentUser) {
       try {
-        const { success, message, payload } = await createUser(
-          currentUser
-        ).unwrap();
+        const { success, message, payload } = await createUser({
+          email: currentUser.email,
+          roleId: currentUser.roleId,
+          userName: currentUser.userName,
+          status: currentUser.status,
+          password: currentUser.password,
+        }).unwrap();
 
         if (success) {
           toast.success(`${message}`, {
@@ -125,8 +188,11 @@ const UserList: React.FC = () => {
             progress: undefined,
             theme: "light",
           });
+          setIsLoading(false);
         }
       } catch (error: any) {
+        setIsLoading(false);
+
         let msg =
           error.message ||
           (error.data && error.data.message) ||
@@ -365,37 +431,51 @@ const UserList: React.FC = () => {
 
       <Dialog open={openAdd} onClose={handleClose}>
         <DialogTitle>{"Add User"}</DialogTitle>
+        {Object.keys(errors).length > 0 && (
+          <Box mt={2} ml={3}>
+            {Object.entries(errors).map(([field, message]) => (
+              <Typography key={field} color="error">
+                {message}
+              </Typography>
+            ))}
+          </Box>
+        )}
+
         <DialogContent>
           <TextField
-            autoFocus
-            margin="dense"
             label="Email"
             type="email"
             fullWidth
+            margin="dense"
             value={currentUser?.email || ""}
             onChange={(e) =>
               setCurrentUser({ ...currentUser!, email: e.target.value })
             }
+            error={!!errors.email}
+            helperText={errors.email}
           />
           <TextField
-            margin="dense"
             label="User Name"
-            type="text"
             fullWidth
+            margin="dense"
             value={currentUser?.userName || ""}
             onChange={(e) =>
               setCurrentUser({ ...currentUser!, userName: e.target.value })
             }
+            error={!!errors.userName}
+            helperText={errors.userName}
           />
           <TextField
-            margin="dense"
             label="Role"
             select
             fullWidth
+            margin="dense"
             value={currentUser?.roleId || ""}
             onChange={(e) =>
               setCurrentUser({ ...currentUser!, roleId: e.target.value })
             }
+            error={!!errors.roleId}
+            helperText={errors.roleId}
           >
             {allRoles?.map((role) => (
               <MenuItem key={role.id} value={role.id}>
@@ -403,34 +483,39 @@ const UserList: React.FC = () => {
               </MenuItem>
             ))}
           </TextField>
-
           <TextField
-            margin="dense"
             label="Status"
-            type="text"
             fullWidth
+            margin="dense"
             value={currentUser?.status || ""}
             onChange={(e) =>
               setCurrentUser({ ...currentUser!, status: e.target.value })
             }
+            error={!!errors.status}
+            helperText={errors.status}
           />
-          <TextField
-            margin="dense"
-            label="Password"
-            type="password"
-            fullWidth
-            value={currentUser?.password || ""}
-            onChange={(e) =>
-              setCurrentUser({ ...currentUser!, password: e.target.value })
-            }
-          />
+          {!currentUser?.id && (
+            <TextField
+              label="Password"
+              type="password"
+              fullWidth
+              margin="dense"
+              value={currentUser?.password || ""}
+              onChange={(e) =>
+                setCurrentUser({ ...currentUser!, password: e.target.value })
+              }
+              error={!!errors.password}
+              helperText={errors.password}
+            />
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary">
             Cancel
           </Button>
-          <Button onClick={handleSaveUser} color="primary">
-            Save
+
+          <Button onClick={handleSaveUser} color="primary" disabled={isLoading}>
+            {isLoading ? <CircularProgress size={24} /> : "Save"}
           </Button>
         </DialogActions>
       </Dialog>
